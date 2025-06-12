@@ -19,13 +19,13 @@ void dummy2(int x) {
 
 //funktion mit buffer overflow vulnerability
 void critFunc() {
-    char buffer[64];
+    char buffer[64]; //64 bytes gilt es zu überschreiben
     printf("Input: ");
-    gets(buffer);  //buffer overflow, gets unsicher
+    gets(buffer);  //buffer overflow, da gets unsicher
 }
 
 int main() {
-    setbuf(stdout, NULL);
+    setbuf(stdout, NULL); //zur demo und vermeiden von synchro issues
     critFunc();
     return 0;
 }
