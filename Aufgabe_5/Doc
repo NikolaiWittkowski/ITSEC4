@@ -1,0 +1,66 @@
+####################################################################################################
+Schritte der Exploit-Konstruktion
+####################################################################################################
+
+1. Um sicherzugehen, dass ASLR deaktiviert ist, wurde folgende bash zeile verwendet:
+echo 0 | sudo tee /proc/sys/kernel/randomize_va_space
+
+2. Mit Ropgadget und symbol table tool adressen und gadgets rausgesucht:
+
+ROPgadget --binary tommysalami > gadgts.txt //Ausgaben in gadgts.txt file
+Nach pop rdi; ret oder RET suchen:
+adresse ret bei: 0x40101a
+
+nm tommysalami | grep win //Ausgabe -> 0000000000401196 T win
+Adresse der win() func: 0x401196
+
+3. Mit offsetfind.py skript offset gefunden (mithilfe Quelle: https://github.com/AshishRanaX/elf_analysis
+Offset: 72 bytes um den RIP zu überschreiben
+
+4. simplen ROP-jump zu func win()
+exploit.py
+
+Mit Hilfestellung von Quelle: https://www.exploit-db.com/docs/english/28479-return-oriented-programming-(rop-ftw).pdf
+
+
+####################################################################################################
+Erweiterte Analyse
+####################################################################################################
+Bei aktivem ASLR würde wegen der Adress Randomization die Adresse der win() fucntion nicht mehr
+gesetzt sein. Das bedeutet, dass es schwerer ist die adresse der zielfunktion ausfindig zu machen.
+
+Mit libc-leaking kann man dies angehen.
+
+(Quelle: https://github.com/nick0ve/how-to-bypass-aslr-on-linux-x86_64)
+
+CET (Control Flow enforcement) würde den ROP verhindern durch validen Call-Return Stack.
+Ist sehr schwer zu umgehen. 
+(Quelle: https://learn.microsoft.com/de-de/cpp/build/reference/cetcompat?view=msvc-170)
+
+####################################################################################################
+Gegenmaßnahmen im Code
+####################################################################################################
+
+void critFunc() {
+    char buffer[64];
+    fgets(buf, sizeof(buf), stdin);
+}
+
+Die Gegenmaßnahme wäre hier simple das nutzen von fgets, da dies sicher ist im Vergleich zu gets.
+gets hat keinen buffer size check, fgets allerdings schon und somit werden Buffer Overflows verhindert. 
+
+####################################################################################################
+Dokumentation
+####################################################################################################
+
+####Was ist Return-Oriented Programming (ROP)?
+ROP ist eine Exploit-Technik, die es Angreifern ermöglicht, eigenen code auszuführen, ohne 
+allerdings neuen Code in Speicher einführen zu müssen. Erzielt wird dies durch mögliche Sicherheitslücken und das Ausnutzen von Anweisungen (genannt Gadgets) in der Binary File oder auch in verlinkten Libraries (z.B. libc), welche jeweils mit einem ret enden
+
+Ablauf:
+Meist nutzt ein ROP Exploit eine vorhandene Buffer-Overflow-Schwachstelle um Kontrolle über
+den Rücksprungzeiger zu übernehmen. Unter Bedacht von aktiven Schutzmechanismen wie z.B. ASLr wird eine Schwachstelle identifiziert (meist Pufferüberlauf) und der genaue Offset zum Überschreiben des Rücksprungs ausgerechnet. Danach sucht man mit Tools wie ROPgadget oder ropper nach geeigneten Gadgets, z.B. von Setzen von Registern (also pop rdi ; ret). Darauf baut man eine ROP-Chain, welche die gewünschten Values setzt und am ende eine Zielfunktion oder einen Systemaufruf ausführt (z.B. eine Shell aufrufen und darauf zugreifen). 
+
+Relevanz in der Moderne:
+Auch heutzutage ist ROP immernoch ein hochrelevantes Thema in der It-Sicherheit, da die steigende Komplexität von Software die Wahrscheinlichkeit für übersehene Angriffsflächen erhöht.
+
