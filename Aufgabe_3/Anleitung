@@ -1,0 +1,35 @@
+//compilen per "make" befehl im terminal
+make
+
+
+//testordner und files bereits angelegt
+//Ordnerinhalt auflisten
+ls test
+
+
+//Output sollte sein:
+189891391389  it_sicherheit_4  tommymalwaresalami  tommysalami_malware
+ajeaehae      malwere          tommysalami
+
+
+//rootkit loaden mit LD_PRELOAD
+export LD_PRELOAD=$PWD/libmy_readdir.so
+
+
+//Ordnerinhalt wieder auflisten
+ls test
+
+
+//Output sollte sein:
+189891391389  ajeaehae  it_sicherheit_4  malwere  tommysalami
+
+
+//rootkit deaktivieren
+unset LD_PRELOAD
+ls test
+
+
+//Output sollte sein:
+189891391389  it_sicherheit_4  tommymalwaresalami  tommysalami_malware
+ajeaehae      malwere          tommysalami
+

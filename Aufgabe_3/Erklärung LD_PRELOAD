@@ -1,0 +1,94 @@
+######################################################################
+LD_PRELOAD
+######################################################################
+LD_PRELOAD ist eine environment variable in linux, die es ermöglicht,
+eine eigene library vor allen anderen libraries zu laden bei programmstart.
+Da dies vor Programmstart passiert, hat libmy_readdir.so vorrang vor den 
+Standardlibraries wie z.B. libc, und man kann so Functions wie readdir überschreiben.
+
+
+######################################################################
+Funktion des Rootkits
+######################################################################
+Der Code myreadlib.c beinhaltet eine eigene Version von der Funktion readdir,
+welche files mit "malware" im namen versteckt
+
+Bei dem Befehl
+export LD_PRELOAD=$PWD/libmy_readdir.so
+wird dem Linux-Loader gesagt, zuerst diese Library vor allen anderen zu laden.
+
+Programme wie ls nutzen readdir, rufen aber nun die überschriebene Version aus der 
+benutzerdefinierten Library auf, statt die originale aus libc. 
+
+Die neue Funktion filtert malware Files, indem sie die originale readdir über dlsym called und
+dann bestimmte Einträge überspringt.
+
+Anzumerken ist, das man keinen Root-Access braucht, nur zugriff auf die Umgebungsvariablen.
+Es ist daher sehr unauffällig, da alles im Userspace und nicht auf Kernel-Ebene läuft.
+
+
+
+######################################################################
+Erkennungsmaßnahmen
+######################################################################
+1. 
+Man kann vorher die LD_PRELOAD variable checken und schauen ob diese gesetzt worden ist:
+echo $LD_PRELOAD
+
+Ist die Variable nicht leer sondern ein ist gesetzt, ist es bereits sehr verdächtig.
+Beispielausgabe im Terminal bei gesetzter Variable:
+
+echo $LD_PRELOAD
+/home/PC/Desktop/ITSEC4_Prak4/Aufgabe_3/libmy_readdir.so
+
+
+
+2.
+Man kann sich die geladenen Libraries anschauen:
+ldd /bin/ls
+
+Erfordert Kenntnisse über die Libraries, aber im benutzten Beispiel für die Aufgabe würde nun die Rootkit Library in der Ausgabe auftauchen.
+
+
+
+3.
+Andere Tools verwenden, welche (im Falle des Beispiels) kein readdir nutzen. Zum vergleichen:
+z.B. find
+
+(Ausgabe mit bereits aktiviertem rootkit)
+VirtualBox:~/Desktop/ITSEC4_Prak4/Aufgabe_3$ ls test
+189891391389  ajeaehae  it_sicherheit_4  malwere  tommysalami
+
+VirtualBox:~/Desktop/ITSEC4_Prak4/Aufgabe_3$ find test
+test
+test/malwere
+test/189891391389
+test/ajeaehae
+test/tommysalami
+test/it_sicherheit_4
+
+
+4.
+Man könnte Systemaufrufe überwachen, z.B. mit strace
+
+strace ls test
+
+Erfordert Kenntnisse, aber wenn man erkennt das in diesem Fall readdir verdächtig oft gecalled wird oder evt. sogar komische Ergebnisse liefert, kann das ein Indiz sein
+
+
+
+
+######################################################################
+Schutzmaßnahmen
+######################################################################
+1. 
+Man könnte wichtige Verzeichnisse nur lesbar machen. In diesem Fall also
+z.B. /usr/lib, um zu verhindern, dass dort schadhafte Libraries platziert werden.
+
+2.
+Man könnte ASLR aktivieren, um Angriffe schwerer zu machen.
+
+3.
+Man könnte die Umgebung kontrollieren, z.B. Container nutzen um Programme in
+isolierten Umgebungen laufen zu lassen.
+

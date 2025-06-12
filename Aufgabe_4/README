@@ -1,0 +1,20 @@
+//compile
+gcc -o auth_overflow auth_overflow.c -Wall -Wextra -m32
+
+//programmstart
+./ioverflow
+
+//Zu Demonstrationszwecken verlangt das Programm für eine erfolgreiche 
+//Authentifizierung einen Hash von 42. Ohne Integer Overflow zu erreichen mit dem Zeichen
+*
+
+
+//Eigentlich war an dieser Stelle das einlesen einer .txt file mit einem sehr langen
+//password, dass per overflow dann wieder 42 ergibt vorgesehen
+//Die Moodle-Filesize begrenzung macht dies aber nicht möglich
+
+
+//ALTERNATIVE:
+//Das Programm beinhaltet einen modus für eine Integer Overflow Demonstration
+//Nutzt man "IntegerOverflow" als Input so simuliert das Programm einen Integer Overflow
+//Das Programm zeigt in diesem Fall die genaue Logik dahinter in der Ausgabe an

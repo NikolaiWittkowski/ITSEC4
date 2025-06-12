@@ -1,0 +1,41 @@
+//Authentication fail
+
+HINWEIS: der Hash des Passworts muss 42 ergeben
+Für Demozwecke: gib 'IntegerOverflow' ein, um automatisch einen Overflow zu testen
+Passwort eingeben: 42
+auth fail. Hash: 102
+
+Da ein Hash Wert von 42 gesucht ist (ASCII Zeichen *), schlägt die Eingabe von "42" (und alle anderen) fehl.
+
+
+//Authentication erfolgreich
+HINWEIS: der Hash des Passworts muss 42 ergeben
+Für Demozwecke: gib 'IntegerOverflow' ein, um automatisch einen Overflow zu testen
+Passwort eingeben: *
+auth erfolgreich. Sup
+Hash: 42
+
+Hier wird das ASCII Zeichen * genutzt. Da 42 + 0 = 42, ist die Authentifizierung erfolgreich
+
+//Simulierter Integer Overflow
+HINWEIS: der Hash des Passworts muss 42 ergeben
+Für Demozwecke: gib 'IntegerOverflow' ein, um automatisch einen Overflow zu testen
+Passwort eingeben: IntegerOverflow
+
+Integer Overflow demonstration.
+addition von 4294967338 (2^32 + 42) zu unsigned int Hash.
+durch overflow wird nur der untere 32 bit teil verwendet:
+(unsigned int)(4294967338) = 42
+
+auth erfolgreich. Sup
+Hash: 42
+
+Unsigned long long ist ein Datetyp für sehr große positive ganzzahlen mit 64 bit.
+Suffix ULL bei 4294967338ULL sagt dem compiler, dass es sich um eine konstante vom
+typ unsigned long long handelt.
+
+Da ein unsigned int nur 32 bit groß ist, kann es maximal den wert 4294967295 speichern.
+Wenn man einen größeren Wert (hier 4294967338 ) in einen unsigned int umwandelt, wird nur der
+untere 32 bit teil übernommen.
+Der Rest geht verloren, was zum integer overflow führt und hier den wert 42 gibt.
+Das Passwort ist somit theoretisch falsch aber es erfolgt trotzdem eine erfolgreiche authentifizierung

@@ -1,0 +1,16 @@
+gcc -o ioverflow ioverflow.c -Wall -Wextra -m32
+
+
+-wall
+Für alle basic warnings, um mögliche probleme zu erkennen
+
+-Wextra
+Weitere warnings aktivieren für erweiterte fehlererkennung
+
+-m32
+force 32 bit compilen, damit der Integer Overflow consistent
+demonstrierbar ist. Auf 32 bit system ist unsigned int
+32 bit groß. Für testzwecke und erleichterung der demonstration
+
+-O
+codeoptimierung deaktivieren, könnte sonst die demo beinträchtigen
